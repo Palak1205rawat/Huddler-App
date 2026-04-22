@@ -14,7 +14,10 @@ router.get("/signup",user_controller.Get_Signup);
 router.post("/signup", validateRegister,user_controller.Post_Signup);
 // router.post("/refresh-token", refreshToken);
 //google auth
-router.get("/google",user_controller.get_google);
+//router.get("/google",user_controller.get_google);
+router.get("/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
 // Google OAuth callback - CORRECT way
 router.get("/google/callback",
