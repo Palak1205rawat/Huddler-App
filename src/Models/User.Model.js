@@ -81,6 +81,7 @@ User_Schema.methods.Generate_Refresh_Token = function () {
     return jwt.sign(
         {
             _id: this._id
+    
         },
         process.env.REFRESH_TOKEN,
         {

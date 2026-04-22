@@ -6,6 +6,8 @@ const socketIO = require("socket.io");
 const connectDB = require("./db/index.js");
 const app = require("./app.js");
 const port = process.env.PORT || 3000;
+console.log("ACCESS:", process.env.ACCESS_TOKEN_SECRET);
+console.log("REFRESH:", process.env.REFRESH_TOKEN_SECRET);
 
 // Create HTTP server
 const server = http.createServer(app);
