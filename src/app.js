@@ -43,7 +43,7 @@ const chatRoutes = require("./Routes/Chat.Routes.js");
 const authRoutes = require("./Routes/auth.Routes.js");
 // Mount routes
 app.use("/user", userRoutes);
-app.use("/chat",chatRoutes);
+app.use("/chat", chatRoutes);
 app.use("/auth", authRoutes);
 app.get("/", (req, res) => {
     res.redirect("/user/login");
