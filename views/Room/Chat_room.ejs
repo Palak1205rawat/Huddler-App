@@ -1256,6 +1256,12 @@
         }
 
         function initMediaPipe(videoElement) {
+             if (!videoElement) {
+        console.error("No video element found for MediaPipe");
+        return;
+    }
+    videoElement.play();
+
     hands = new Hands({
         locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
@@ -1273,7 +1279,8 @@
 
     camera = new Camera(videoElement, {
     onFrame: async () => {
-        if (!gestureRunning) return;
+        //if (!gestureRunning) return;
+        if (!gestureRunning || !videoElement || videoElement.readyState < 2) return;
 
         if (videoElement.readyState >= 2) {
             await hands.send({ image: videoElement });
@@ -1285,9 +1292,39 @@
 
     camera.start();
 }
-
+video.onloadedmetadata = () => {
+    video.play();
+};
 
     async function onResults(results) {
+    if (!gestureRunning) return;   //  ON/OFF switch
+    if (!results.multiHandLandmarks?.length) return;
+    if (!document.hasFocus()) return;
+
+    if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) return;
+
+    const landmarks = results.multiHandLandmarks[0];
+
+    let data = [];
+
+    landmarks.forEach(lm => {
+        data.push(lm.x, lm.y, lm.z);
+    });
+
+    const res = await fetch(`${BASE_URL}/predict`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ landmarks: data })
+    });
+
+    const result = await res.json();
+
+    document.getElementById("gestureOutput").innerText = result.label;
+}
+
+    /*async function onResults(results) {
     if (!gestureRunning) return;
 
     if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) return;
@@ -1312,7 +1349,7 @@
     const result = await res.json();
 
     document.getElementById("gestureOutput").innerText = result.label;
-}
+}*/
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', cleanup);
@@ -1328,7 +1365,32 @@
         let gestureInterval = null;
 
         // START
-        startBtn.addEventListener("click", async () => {
+
+        startBtn.addEventListener("click", () => {
+    
+
+    //const video = window.localVideoElement;
+       //const video = window.localVideoElement || localStreamVideoRef;
+            const video = document.querySelector("video");
+
+    if (!video) {
+        showNotification("⚠️ Camera not ready yet");
+        return;
+    }
+
+    if (!mpInitialized) {
+        initMediaPipe(video);
+        mpInitialized = true;
+    }
+    video.play();
+
+    gestureRunning = true;
+
+    showNotification("🟢 Gesture Started");
+});
+
+
+        /*startBtn.addEventListener("click", async () => {
     try {
         console.log("Calling:", `${BASE_URL}/start`);
 
@@ -1363,7 +1425,9 @@
         console.error("❌ START ERROR:", err);
         showNotification("❌ Failed to start gesture");
     }
-});
+});*/
+
+
        /* startBtn.addEventListener("click", async () => {
     try {
         const res = await fetch(`${BASE_URL}/start`, {
@@ -1397,7 +1461,15 @@
 
         // STOP
 
-        stopBtn.addEventListener("click", async () => {
+
+        stopBtn.addEventListener("click", () => {
+    gestureRunning = false;
+    document.getElementById("gestureOutput").innerText = "";
+    showNotification("🔴 Gesture Stopped");
+});
+
+
+       /* stopBtn.addEventListener("click", async () => {
     try {
         console.log("Calling:", `${BASE_URL}/stop`);
 
@@ -1421,7 +1493,9 @@
         console.error("❌ STOP ERROR:", err);
         showNotification("❌ Failed to stop gesture");
     }
-});
+});*/
+
+
         /*stopBtn.addEventListener("click", async () => {
     try {
         const res = await fetch(`${BASE_URL}/stop`, {
