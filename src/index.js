@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
-//dotenv.config();
-require("dotenv").config({ path: ".env" });
+dotenv.config();
+//require("dotenv").config({ path: ".env" });
 const http = require("http");
 const socketIO = require("socket.io");
 const connectDB = require("./db/index.js");

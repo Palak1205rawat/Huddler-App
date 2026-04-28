@@ -22,11 +22,22 @@ app.use(methodOverride("_method"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "../views"));
 // Session middleware (required for Passport)
+app.set("trust proxy", 1);
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        secure: true,
+        sameSite: "none"
+    }
 }));
+//app.use(session({
+//     secret: process.env.SESSION_SECRET || 'your-secret-key',
+//     resave: false,
+//     saveUninitialized: false
+// }));
 
 app.use(passport.initialize());
 app.use(passport.session());
