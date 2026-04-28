@@ -237,10 +237,10 @@
         }
 
 
-        #startGesture {
+        /*#startGesture {
         background: red !important;
          border: 3px solid yellow !important;
-        }
+        }*/
         /* ========== CONTROLS ========== */
         .controls {
             display: flex;
@@ -555,7 +555,7 @@
 
                 <!-- 🛑 GESTURE STOP -->
                 <button class="control-btn" id="stopGesture" title="Stop Gesture Recognition">
-                    🚫
+                    ✋❌
                 </button>
                 <button class="control-btn danger" id="leaveRoomBtn" title="Leave Room">
                     📞
@@ -604,11 +604,12 @@
         let hands;
         let camera;
         let gestureRunning = false;
-        //const BASE_URL = "https://gesture-api-sr4q.onrender.com";
-        const BASE_URL =
+       
+        const BASE_URL = "https://gesture-api-sr4q.onrender.com";
+       /* const BASE_URL =
             window.location.hostname === "localhost"
              ? "http://127.0.0.1:5000"
-            : "https://gesture-api-sr4q.onrender.com";
+            : "https://gesture-api-sr4q.onrender.com";*/
 
         let mpInitialized = false;
 
@@ -1329,6 +1330,42 @@
         // START
         startBtn.addEventListener("click", async () => {
     try {
+        console.log("Calling:", `${BASE_URL}/start`);
+
+        const res = await fetch(`${BASE_URL}/start`, {
+            method: "POST"
+        });
+
+        const data = await res.text(); // 👈 IMPORTANT DEBUG STEP
+        console.log("Response:", res.status, data);
+
+        if (!res.ok) {
+            throw new Error(`Start failed: ${res.status} - ${data}`);
+        }
+
+        gestureRunning = true;
+
+        const video = window.localVideoElement;
+
+        if (!video) {
+            showNotification("⚠️ Camera not ready yet");
+            return;
+        }
+
+        if (!mpInitialized) {
+            initMediaPipe(video);
+            mpInitialized = true;
+        }
+
+        showNotification("🟢 Gesture Started");
+
+    } catch (err) {
+        console.error("❌ START ERROR:", err);
+        showNotification("❌ Failed to start gesture");
+    }
+});
+       /* startBtn.addEventListener("click", async () => {
+    try {
         const res = await fetch(`${BASE_URL}/start`, {
             method: "POST"
         });
@@ -1355,20 +1392,37 @@
         console.error(err);
         showNotification("❌ Failed to start gesture");
     }
-});
-        //startBtn.addEventListener("click", () => {
-    //gestureRunning = true;
+});*/
 
-    //const video = document.querySelector("video");
-
-    //initMediaPipe(video);
-
-    //showNotification("🟢 Gesture Started");
-//});
 
         // STOP
 
         stopBtn.addEventListener("click", async () => {
+    try {
+        console.log("Calling:", `${BASE_URL}/stop`);
+
+        const res = await fetch(`${BASE_URL}/stop`, {
+            method: "POST"
+        });
+
+        const data = await res.text();
+        console.log("Response:", res.status, data);
+
+        if (!res.ok) {
+            throw new Error(`Stop failed: ${res.status} - ${data}`);
+        }
+
+        gestureRunning = false;
+        document.getElementById("gestureOutput").innerText = "";
+
+        showNotification("🔴 Gesture Stopped");
+
+    } catch (err) {
+        console.error("❌ STOP ERROR:", err);
+        showNotification("❌ Failed to stop gesture");
+    }
+});
+        /*stopBtn.addEventListener("click", async () => {
     try {
         const res = await fetch(`${BASE_URL}/stop`, {
             method: "POST"
@@ -1386,14 +1440,8 @@
         console.error(err);
         showNotification("❌ Failed to stop gesture");
     }
-});
-       // stopBtn.addEventListener("click", () => {
-    //gestureRunning = false;
-
-    //document.getElementById("gestureOutput").innerText = "";
-
-    //showNotification("🔴 Gesture Stopped");
-//});
+});*/
+       
     </script>
 </body>
 
